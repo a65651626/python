@@ -1,0 +1,12 @@
+##饼图
+import matplotlib.pyplot as plt
+
+##切片按顺时针方向排列并绘制
+labels='Frogs','Hogs','Dogs','Logs' ##标注
+sizes=[15,30,45,10] ##大小
+colors=['yellowgreen','gold','lightskyblue','lightcoral'] ##颜色
+explode=(0,0.1,0,0) ##表示第二个块0.1从圆中分离
+##绘制饼图
+plt.pie(sizes,explode=explode,labels=labels,colors=colors,autopct='%1.1f%%',shadow=True,startangle=90)
+plt.axis('equal')
+plt.show()
