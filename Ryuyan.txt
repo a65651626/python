@@ -1,1 +1,76 @@
-hello R world！
+hello R world！hello R world！
+
+## Loading packages
+if(!require(tidyverse)){
+  install.packages("tidyverse")
+  library(tidyverse)
+}
+
+if(!require(readxl)){
+  install.packages("readxl")
+  library(readxl)
+}
+
+library(forecast)
+
+data <- read_excel('data.xlsx')
+data$time <- as.Date(data$time ,format="%Y%m")
+data$ym <- zoo::as.yearmon(data$time) %>% factor()  ###没明白
+
+### arima
+data0 <- read_excel('data.xlsx')
+data0 <- data[,1]
+data0 <- ts(data0,start = c(2016,1),frequency = 12)
+fit <- arima(data0,order = c(0,0,2),seasonal = list(order=c(0,1,0),period=12))
+pro <- forecast(fit,h=12)
+
+### 置信区间
+low80 = pro$lower[,1]
+low90 = pro$lower[,2]
+
+high80 = pro$upper[,1]
+high90 = pro$upper[,2]
+
+## x轴label
+labs0 <- rep('',60)
+labs <- c(data$ym %>% as.character(),
+          '1月 2020','2月 2020','3月 2020','4月 2020','5月 2020','6月 2020','7月 2020','8月 2020',
+          '9月 2020','10月 2020','11月 2020','12月 2020')
+labs0[seq(1,60,3)] <- labs[seq(1,60,3)] 
+
+##  构造数据框，原始和预测数据
+d2 <- data.frame(
+  time = c(1:60),
+  value = c(data$value, pro$mean)
+)
+
+## 作图
+ggplot() + 
+  geom_point(data = d2,aes(time,value)) +  
+  geom_line(data = d2,aes(time,value)) +
+  geom_ribbon(aes(x = c(49:60) ,ymin = low80, ymax = high80), fill = "steelblue", alpha = 0.6)+
+  geom_ribbon(aes(x = c(49:60) ,ymin = low90, ymax = high90), fill = "skyblue", alpha = 0.6)+ 
+  geom_vline(xintercept = 42, color = 'orange', size = 1,
+             linetype = 2) +
+  annotate("text", x=43, y=0.3, label= "元旦")+
+  scale_x_discrete(limits = c(1:60), labels = labs0  ) +  
+  theme(axis.text.x = element_text(angle = 90))
+
+## 原始数据
+d3 <- data.frame(
+  time = c(1:48),
+  value = c(data$value)
+)
+
+## x轴labels
+labs0 <- rep('',48)
+labs00 <- c(data$ym %>% as.character())
+labs0[seq(1,48,3)] <- labs00[seq(1,48,3)] ##数组填充序列
+
+## 作图
+ggplot() + 
+  geom_point(data = d3,aes(time,value)) +  
+  geom_line(data = d3,aes(time,value)) +
+  scale_x_discrete(limits = c(1:48), labels = labs0 ) +  #####没明白是怎么写的
+  theme(axis.text.x = element_text(angle = 90))
+
