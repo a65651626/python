@@ -1,4 +1,4 @@
-hello R world！hello R world！
+hello R world！
 
 ## Loading packages
 if(!require(tidyverse)){
